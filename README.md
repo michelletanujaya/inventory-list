@@ -1,46 +1,106 @@
-# Getting Started with Create React App
+# Inventory Management System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern inventory management application built with React and Supabase for tracking stock levels, logs, and inventory operations.
 
-## Available Scripts
+## ✨ Features
 
-In the project directory, you can run:
+- **Inventory Management** - Add, edit, and delete inventory items
+- **Stock Tracking** - Record daily stock additions and sales
+- **Running Totals** - Automatic calculation of inventory levels
+- **Authentication** - Secure login with email/password and OAuth (Google, GitHub)
+- **Responsive Design** - Optimized for desktop and tablet use
+- **Real-time Data** - Powered by Supabase for instant updates
 
-### `npm start`
+## 🛠️ Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **Frontend**: React 19, TypeScript, Styled Components
+- **Backend**: Supabase (Database, Auth, Real-time)
+- **State Management**: TanStack Query (React Query)
+- **UI Components**: Custom styled components with responsive design
+- **Forms**: React Hook Form
+- **Routing**: React Router DOM
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 🚀 Quick Start
 
-### `npm test`
+1. **Clone the repository**
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+   ```bash
+   git clone <your-repo-url>
+   cd inventory-list
+   ```
 
-### `npm run build`
+2. **Install dependencies**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+   ```bash
+   npm install
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. **Set up environment variables**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   ```bash
+   cp .env.example .env.local
+   ```
 
-### `npm run eject`
+   Add your Supabase credentials:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+   ```
+   REACT_APP_SUPABASE_URL=your_supabase_url
+   REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. **Start the development server**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+   ```bash
+   npm start
+   ```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+5. **Open [http://localhost:3000](http://localhost:3000)**
 
-## Learn More
+## 📋 Available Scripts
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- `npm start` - Run development server
+- `npm build` - Build for production
+- `npm test` - Run tests
+- `npm run lint` - Check code quality
+- `npm run lint:fix` - Fix linting issues
+- `npm run typecheck` - Check TypeScript types
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🔧 Configuration
+
+### Supabase Setup
+
+1. Create a new Supabase project
+2. Run the database migrations (see `/sql` folder)
+3. Configure authentication providers in Supabase dashboard
+4. Set up Row Level Security (RLS) policies
+
+### Authentication
+
+Supports multiple authentication methods:
+
+- Email/Password signup and login
+- OAuth providers (Google, GitHub, Facebook)
+- Email OTP (One-Time Password)
+- Phone SMS OTP
+
+## 📱 Mobile Support
+
+The app is optimized for desktop and tablet use. Mobile devices receive simplified views or guidance to use larger screens for complex operations.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Create React App](https://create-react-app.dev/) for the initial setup
+- [Supabase](https://supabase.com/) for backend infrastructure
+- [TanStack Query](https://tanstack.com/query) for data management
