@@ -1,22 +1,38 @@
 import { useState } from "react";
-import { IconButton } from "../../ui/IconButton";
 import { Delete } from "../../ui/icons";
-import { ConfirmationModal } from "../../ui/ConfirmationModal";
+import ConfirmationModal from "../../ui/ConfirmationModal";
 import { useDeleteInventoryById } from "../../hooks/useInventories";
-import { useToast } from "../Toast";
+import { useToast } from "../../ui/Toast";
 import { Alert } from "../../ui/Alert";
+import IconButton from "../../ui/IconButton";
+import { useProjectId } from "../../hooks/useProjectId";
+import { usePermissions } from "../../hooks/usePermissions";
+import Button from "../../ui/Button";
 
-interface DeleteTypeButtonProps {
+interface DeleteInventoryButtonProps {
   itemId: string;
 }
 
-const DeleteTypeButton = ({ itemId }: DeleteTypeButtonProps) => {
+const DeleteInventoryButton = ({ itemId }: DeleteInventoryButtonProps) => {
+  const projectId = useProjectId();
+  const { data: permissions } = usePermissions(projectId);
   const [isOpen, setIsOpen] = useState(false);
   const { showSuccess, showError } = useToast();
 
-  const deleteInventory = useDeleteInventoryById(itemId);
+  if (!permissions?.can_delete) {
+    return null;
+  }
 
-  const handleDeleteClick = () => setIsOpen(true);
+  const deleteInventory = useDeleteInventoryById(itemId, projectId, {
+    onSuccess: () => {
+      showSuccess("Inventory deleted successfully");
+    },
+    onError: (error) => {
+      showError("Failed to delete inventory");
+    },
+  });
+
+  const handleOpenModal = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
   const handleConfirm = async () => {
     try {
@@ -30,12 +46,9 @@ const DeleteTypeButton = ({ itemId }: DeleteTypeButtonProps) => {
 
   return (
     <>
-      <IconButton
-        aria-label="Delete"
-        icon={<Delete />}
-        onClick={handleDeleteClick}
-        size="small"
-      />
+      <Button variant="secondary" onClick={handleOpenModal}>
+        Delete
+      </Button>
       <ConfirmationModal
         isOpen={isOpen}
         onClose={handleClose}
@@ -54,4 +67,4 @@ const DeleteTypeButton = ({ itemId }: DeleteTypeButtonProps) => {
   );
 };
 
-export default DeleteTypeButton;
+export default DeleteInventoryButton;

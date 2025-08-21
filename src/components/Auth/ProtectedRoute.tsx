@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import styled from "styled-components";
 
@@ -17,13 +17,14 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
+  const router = useRouter();
 
   if (loading) {
     return <LoadingContainer>Loading...</LoadingContainer>;
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    router.push("/login");
   }
 
   return <>{children}</>;

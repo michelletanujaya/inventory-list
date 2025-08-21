@@ -1,5 +1,5 @@
 import React from "react";
-import { DataTable } from "../../ui/DataTable";
+import DataTable from "../../ui/DataTable";
 import { columns, LogRow } from "./columns";
 import { TableLayout } from "../TableLayout/TableLayout";
 import { Log } from "../../lib/supabase";
@@ -28,9 +28,10 @@ const LogsTable: React.FC<LogsTableProps> = ({ logs }) => {
       <DataTable
         data={tableData}
         columns={columns}
-        renderExpandedRow={(row) =>
-          renderExpandedRow(logs.find((log) => log.id === row.id)!)
-        }
+        renderExpandedRow={(rowData) => {
+          const originalLog = logs.find((log) => log.id === rowData.id);
+          return originalLog ? renderExpandedRow(originalLog) : null;
+        }}
       />
     </TableLayout>
   );

@@ -7,6 +7,7 @@ import {
   getLogById,
   getLogs,
   getLogsByDateRange,
+  getLogsWithRunningTotals,
   updateLog,
 } from "../services/logs";
 import { Log, LogUpdate } from "../lib/supabase";
@@ -15,16 +16,26 @@ import { Log, LogUpdate } from "../lib/supabase";
 export const logKeys = {
   all: ["logs"] as const,
   lists: () => [...logKeys.all, "list"] as const,
-  list: (filters: string) => [...logKeys.lists(), { filters }] as const,
+  list: (projectId: string) => [...logKeys.lists(), projectId] as const,
   details: () => [...logKeys.all, "detail"] as const,
   detail: (id: string) => [...logKeys.details(), id] as const,
 };
 
-// Get all logs
-export const useLogs = () => {
+// Get logs with running totals
+export const useLogsWithRunningTotals = (projectId: string) => {
   return useQuery({
-    queryKey: logKeys.lists(),
-    queryFn: getLogs, // Switch back to getLogs once function is fixed
+    queryKey: logKeys.list(projectId),
+    queryFn: () => getLogsWithRunningTotals(projectId),
+    enabled: !!projectId,
+  });
+};
+
+// Get all logs
+export const useLogs = (projectId: string) => {
+  return useQuery({
+    queryKey: logKeys.list(projectId),
+    queryFn: () => getLogs(projectId),
+    enabled: !!projectId,
   });
 };
 
@@ -56,16 +67,22 @@ export const useLogsByDateRange = (startDate: string, endDate: string) => {
 };
 
 // Create log
-export const useCreateLog = (options?: {
-  onSuccess?: (data: Log) => void;
-  onError?: (error: Error) => void;
-}) => {
+export const useCreateLog = (
+  projectId: string,
+  options?: {
+    onSuccess?: (data: Log) => void;
+    onError?: (error: Error) => void;
+  }
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: createLog,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: logKeys.lists() });
+      // Invalidate project logs list
+      queryClient.invalidateQueries({ queryKey: logKeys.list(projectId) });
+      // Invalidate logs by date (for Stocks component)
+      queryClient.invalidateQueries({ queryKey: logKeys.list(data.date) });
       options?.onSuccess?.(data);
     },
     onError: options?.onError,
@@ -73,18 +90,25 @@ export const useCreateLog = (options?: {
 };
 
 // Update log
-export const useUpdateLog = (options?: {
-  onSuccess?: (data: Log) => void;
-  onError?: (error: Error) => void;
-}) => {
+export const useUpdateLog = (
+  projectId: string,
+  options?: {
+    onSuccess?: (data: Log) => void;
+    onError?: (error: Error) => void;
+  }
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: LogUpdate }) =>
       updateLog(id, updates),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: logKeys.lists() });
+      // Invalidate project logs list
+      queryClient.invalidateQueries({ queryKey: logKeys.list(projectId) });
+      // Invalidate specific log detail
       queryClient.invalidateQueries({ queryKey: logKeys.detail(data.id) });
+      // Invalidate logs by date (for Stocks component)
+      queryClient.invalidateQueries({ queryKey: logKeys.list(data.date) });
       options?.onSuccess?.(data);
     },
     onError: options?.onError,
@@ -92,32 +116,38 @@ export const useUpdateLog = (options?: {
 };
 
 // Delete log
-export const useDeleteLog = (options?: {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-}) => {
+export const useDeleteLog = (
+  projectId: string,
+  options?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  }
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteLog,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: logKeys.lists() });
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: logKeys.list(projectId) });
       options?.onSuccess?.();
     },
     onError: options?.onError,
   });
 };
 
-export const useDeleteLogByDate = (options?: {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-}) => {
+export const useDeleteLogByDate = (
+  projectId: string,
+  options?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  }
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteLogByDate,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: logKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: logKeys.list(projectId) });
       options?.onSuccess?.();
     },
     onError: options?.onError,

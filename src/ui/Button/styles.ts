@@ -6,6 +6,7 @@ interface StyledButtonProps {
   fullWidth: boolean;
   customWidth?: number;
   size?: "small" | "medium";
+  textTransform?: "uppercase" | "none";
 }
 
 export const StyledButton = styled.button<StyledButtonProps>`
@@ -13,7 +14,7 @@ export const StyledButton = styled.button<StyledButtonProps>`
   border: none;
   cursor: pointer;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: ${({ textTransform }) => textTransform || "uppercase"};
   letter-spacing: 0.05em;
   transition: background 0.2s, color 0.2s, border 0.2s;
   outline: none;
@@ -31,7 +32,6 @@ export const StyledButton = styled.button<StyledButtonProps>`
         return `
           padding: 0.25rem 0.75rem;
           font-size: 0.75rem;
-          text-transform: none;
         `;
       case "medium":
       default:
@@ -43,8 +43,8 @@ export const StyledButton = styled.button<StyledButtonProps>`
   }}
 
   svg {
-    width: 1rem;
-    height: 1rem;
+    width: 0.875rem;
+    height: 0.875rem;
   }
 
   ${({ variant }) => {

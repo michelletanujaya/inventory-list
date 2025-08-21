@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     loading,
     signIn,
     signUp,
-    signInWithOAuth, // Add this
+    signInWithOAuth,
     signOut,
   };
 

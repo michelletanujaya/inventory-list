@@ -18,6 +18,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "small" | "medium";
   variant?: ButtonVariant;
   width?: number;
+  textTransform?: "uppercase" | "none";
 }
 
 const Button = ({
@@ -29,6 +30,7 @@ const Button = ({
   size = "medium",
   variant = "primary",
   width,
+  textTransform = "uppercase",
   ...props
 }: ButtonProps) => {
   return (

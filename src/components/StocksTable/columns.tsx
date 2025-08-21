@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Control } from "react-hook-form";
-import { StockFormValues } from "./Stocks";
+import { StockFormValues } from "../Stocks/Stocks";
 
 export interface StockRow extends Record<string, unknown> {
   id: string;

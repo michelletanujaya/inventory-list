@@ -3,14 +3,16 @@ import Button from "../../ui/Button";
 import { useInventories } from "../../hooks/useInventories";
 import { useLogsByDate, useUpdateLog, useCreateLog } from "../../hooks/useLogs";
 import { useForm } from "react-hook-form";
-import { columns, StockRow } from "./columns";
+import { StockRow } from "../StocksTable/columns";
 import { useEffect, useState } from "react";
-import { editableColumns } from "./editableColumns";
 import { Inventory, Log } from "../../lib/supabase";
-import StocksTable from "./StocksTable";
-import { useToast } from "../Toast";
+import StocksTable from "../StocksTable/StocksTable";
+import { useToast } from "../../ui/Toast";
+import { useProjectId } from "../../hooks/useProjectId";
+import DeleteLogButton from "../Logs/DeleteLogButton";
+import { usePermissions } from "../../hooks/usePermissions";
 
-type StocksValue = Record<
+export type StocksValue = Record<
   string,
   { quantityAdded: number; quantitySold: number }
 >;
@@ -51,10 +53,12 @@ interface StocksProps {
 }
 
 const Stocks = ({ logDate }: StocksProps) => {
+  const projectId = useProjectId();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { showSuccess, showError } = useToast();
+  const { data: permissions } = usePermissions(projectId);
 
-  const { data: inventories } = useInventories();
+  const { data: inventories } = useInventories(projectId);
   const { data: logs } = useLogsByDate(logDate);
 
   const form = useForm<StockFormValues>({
@@ -67,18 +71,18 @@ const Stocks = ({ logDate }: StocksProps) => {
 
   const { control, handleSubmit, reset } = form;
 
-  const updateLog = useUpdateLog();
-  const createLog = useCreateLog();
+  const updateLog = useUpdateLog(projectId);
+  const createLog = useCreateLog(projectId);
 
   const onCancel = () => {
     reset(getDefaultValues(inventories ?? [], logs ?? []));
     setIsEditing(false);
   };
 
-  const onHandleSubmit = (data: StockFormValues) => {
+  const onHandleSubmit = async (data: StockFormValues) => {
     const { stocks } = data;
     try {
-      Promise.all(
+      await Promise.all(
         Object.entries(stocks).map(([inventoryId, stock]) => {
           const log = logs?.find((log) => log.inventory_id === inventoryId);
           if (log) {
@@ -95,6 +99,7 @@ const Stocks = ({ logDate }: StocksProps) => {
               add_quantity: stock.quantityAdded ?? 0,
               sold_quantity: stock.quantitySold ?? 0,
               date: logDate,
+              project_id: projectId,
             });
           }
         })
@@ -144,24 +149,26 @@ const Stocks = ({ logDate }: StocksProps) => {
             </Button>
           </>
         ) : (
-          <Button
-            variant="primary"
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              setIsEditing(true);
-            }}
-          >
-            Edit
-          </Button>
+          <>
+            {permissions?.can_delete && permissions?.is_admin && (
+              <DeleteLogButton logDate={logDate} />
+            )}
+            {permissions?.can_update && permissions?.is_admin && (
+              <Button
+                variant="primary"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsEditing(true);
+                }}
+              >
+                Edit
+              </Button>
+            )}
+          </>
         )}
       </StyledActions>
-      <StocksTable
-        data={tableData}
-        isEditing={isEditing}
-        editableColumns={editableColumns}
-        columns={columns}
-      />
+      <StocksTable data={tableData} isEditing={isEditing} />
     </StyledStocksForm>
   );
 };

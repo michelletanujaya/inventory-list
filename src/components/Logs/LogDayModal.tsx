@@ -1,16 +1,19 @@
 import styled from "styled-components";
 import Button from "../../ui/Button";
-import { Modal } from "../../ui/Modal";
-import { Controller, useForm } from "react-hook-form";
-import { LogInsert } from "../../lib/supabase";
+import Modal from "../../ui/Modal";
+import { useForm } from "react-hook-form";
 import Field from "../../ui/Field";
 import { TextInput } from "../../ui/TextInput";
 import { useCreateLog } from "../../hooks/useLogs";
-import { useToast } from "../Toast";
+import { useToast } from "../../ui/Toast";
 import { Alert } from "../../ui/Alert";
 import { useState, useEffect } from "react";
 import { useInventories } from "../../hooks/useInventories";
 import { getLogByDate } from "../../services/logs";
+import { useRouter } from "next/router";
+import { StockRow } from "../StocksTable/columns";
+import StocksTable from "../StocksTable/StocksTable";
+import { StockFormValues } from "../Stocks/Stocks";
 
 const StyledForm = styled.form`
   display: flex;
@@ -21,66 +24,100 @@ const StyledForm = styled.form`
 interface LogDayModalProps {
   isOpen: boolean;
   onClose: () => void;
+  projectId: string;
 }
 
-const LogDayModal = ({ isOpen, onClose }: LogDayModalProps) => {
+const LogDayModal = ({ isOpen, onClose, projectId }: LogDayModalProps) => {
+  const router = useRouter();
   const { showSuccess, showError } = useToast();
+  const [date, setDate] = useState<string>("");
+  const [showLogForm, setShowLogForm] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
-  const { data: inventories } = useInventories();
+  const { data: inventories } = useInventories(projectId);
 
-  const form = useForm<LogInsert>({
-    defaultValues: { date: new Date().toISOString().slice(0, 10) },
+  // TODO fix type
+  const getDefaultValues = (): StockFormValues => {
+    const stocks: { [key: string]: any } = {};
+    if (inventories) {
+      inventories.forEach((inventory) => {
+        stocks[inventory.id] = {
+          quantityAdded: 0,
+          quantitySold: 0,
+        };
+      });
+    }
+    return {
+      stocks,
+    };
+  };
+
+  const form = useForm<StockFormValues>({
+    defaultValues: getDefaultValues(),
   });
 
-  const { control, handleSubmit, reset } = form;
+  const { control, handleSubmit, reset, watch } = form;
 
   useEffect(() => {
     if (isOpen) {
-      reset();
+      reset(getDefaultValues());
     }
-  }, [isOpen, reset]);
+  }, [isOpen, reset, date, inventories]);
 
   const onHandleClose = () => {
     reset();
     onClose();
   };
 
-  const createLog = useCreateLog({
-    onSuccess: () => {
-      showSuccess("Log created successfully!");
-      onHandleClose();
-    },
-    onError: () => {
-      showError("Failed to create log");
-    },
-  });
+  const createLog = useCreateLog(projectId);
 
-  const onHandleSubmit = async (data: LogInsert) => {
+  const onHandleNext = async () => {
     setIsError(false);
 
     // if date is already in the database, don't add it again
-    const existingLog = await getLogByDate(data.date);
+    const existingLog = await getLogByDate(date);
 
     if (existingLog.length > 0) {
       setIsError(true);
       return;
     }
+    setShowLogForm(true);
+  };
 
-    if (inventories) {
+  const onHandleSubmit = async (data: StockFormValues) => {
+    const { stocks } = data;
+    try {
       await Promise.all(
-        inventories.map(async (inventory) => {
-          const formData = {
-            date: data.date,
-            inventory_id: inventory.id,
-            add_quantity: 0,
-            sold_quantity: 0,
-          };
-          await createLog.mutateAsync(formData);
+        Object.entries(stocks).map(async ([inventoryId, stock]) => {
+          return createLog.mutateAsync({
+            inventory_id: inventoryId,
+            add_quantity: stock.quantityAdded ?? 0,
+            sold_quantity: stock.quantitySold ?? 0,
+            date: date,
+            project_id: projectId,
+          });
         })
       );
+
+      showSuccess(`Log entries created for ${date}!`);
+      onHandleClose();
+    } catch (error) {
+      showError("Failed to create log entries");
+      console.error("Error creating logs:", error);
     }
   };
+
+  const hasInventories = inventories && inventories.length > 0;
+
+  // Prepare table data for StocksTable
+  const tableData: StockRow[] =
+    inventories?.map((inventory) => ({
+      id: inventory.id,
+      name: inventory.name,
+      quantityAdded: 0, // Default value for new logs
+      quantitySold: 0, // Default value for new logs
+      control: control,
+    })) ?? [];
 
   return (
     <Modal
@@ -92,28 +129,65 @@ const LogDayModal = ({ isOpen, onClose }: LogDayModalProps) => {
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            type="submit"
-            form="log-day-form"
-            isLoading={createLog.isPending}
-          >
-            Log day
-          </Button>
+          {showLogForm ? (
+            hasInventories ? (
+              <Button
+                variant="primary"
+                type="submit"
+                form="log-day-form"
+                isLoading={createLog.isPending}
+              >
+                Submit
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => router.push(`/project/${projectId}/inventories`)}
+              >
+                Go to Inventories
+              </Button>
+            )
+          ) : (
+            <Button
+              variant="primary"
+              type="button"
+              isLoading={createLog.isPending}
+              onClick={onHandleNext}
+            >
+              Next
+            </Button>
+          )}
         </>
       }
     >
-      <StyledForm id="log-day-form" onSubmit={handleSubmit(onHandleSubmit)}>
+      {showLogForm ? (
+        <StyledForm id="log-day-form" onSubmit={handleSubmit(onHandleSubmit)}>
+          {hasInventories ? (
+            <StocksTable data={tableData} isEditing={true} />
+          ) : (
+            // TODO: fix styling
+            <div>
+              <span>No inventories yet</span>
+              <span>
+                You need to create some inventory items before you can log daily
+                activities.
+              </span>
+            </div>
+          )}
+        </StyledForm>
+      ) : (
         <Field label="Date" name="date">
-          <Controller
-            name="date"
-            control={control}
-            render={({ field }) => (
-              <TextInput id="logDate" type="date" {...field} />
-            )}
+          <TextInput
+            id="logDate"
+            type="date"
+            value={date}
+            onChange={(e) => {
+              setDate(e.target.value);
+            }}
           />
         </Field>
-      </StyledForm>
+      )}
       {isError && (
         <Alert title="Log for this day is already exists" variant="error" />
       )}

@@ -2,10 +2,11 @@ import styled from "styled-components";
 import OAuthButtons from "./OAuthButtons";
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "../Toast";
+import { useRouter } from "next/router";
+import { useToast } from "../../ui/Toast";
 import { TextInput } from "../../ui/TextInput";
 import Button from "../../ui/Button";
+import { useForm } from "react-hook-form";
 
 const LoginContainer = styled.div`
   max-width: 300px;
@@ -60,25 +61,36 @@ const ToggleLink = styled.button`
   font-weight: 600;
 `;
 
+type FormValues = {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+};
+
 const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
-  const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { showToast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>();
 
+  const onSubmit = async (data: FormValues) => {
     try {
       const { error } = isSignUp
-        ? await signUp(email, password, firstName, lastName)
-        : await signIn(email, password);
+        ? await signUp(
+            data.email,
+            data.password,
+            data.firstName || "",
+            data.lastName || ""
+          )
+        : await signIn(data.email, data.password);
 
       if (error) {
         showToast(error.message, "error");
@@ -90,13 +102,12 @@ const Login: React.FC = () => {
           "success"
         );
         if (!isSignUp) {
-          navigate("/");
+          router.push("/");
         }
+        reset();
       }
     } catch (error) {
       showToast("An error occurred", "error");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -104,43 +115,45 @@ const Login: React.FC = () => {
     <LoginContainer>
       <StyledTitle>{isSignUp ? "Sign Up" : "Sign In"}</StyledTitle>
       <OAuthButtons />
-      <StyledForm onSubmit={handleSubmit}>
+      <StyledForm onSubmit={handleSubmit(onSubmit)}>
         <StyledFormFields>
           {isSignUp && (
             <>
               <TextInput
                 type="text"
                 placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                {...register("firstName", { required: true })}
+                aria-invalid={errors.firstName ? "true" : "false"}
               />
               <TextInput
                 type="text"
                 placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                {...register("lastName", { required: true })}
+                aria-invalid={errors.lastName ? "true" : "false"}
               />
             </>
           )}
           <TextInput
             type="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            {...register("email", { required: true })}
+            aria-invalid={errors.email ? "true" : "false"}
           />
           <TextInput
             type="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
+            {...register("password", { required: true, minLength: 6 })}
+            aria-invalid={errors.password ? "true" : "false"}
           />
         </StyledFormFields>
         <StyledAction>
-          <Button type="submit" variant="primary" disabled={loading}>
-            {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isSubmitting}
+            isLoading={isSubmitting}
+          >
+            {isSignUp ? "Sign Up" : "Sign In"}
           </Button>
           <ToggleText>
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}

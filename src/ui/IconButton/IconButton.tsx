@@ -1,5 +1,5 @@
 import React from "react";
-import { StyledIconButton, IconContent } from "./styles";
+import { StyledIconButton, StyledIconContent } from "./styles";
 import { ButtonVariant } from "../Button/Button";
 
 interface IconButtonProps
@@ -10,24 +10,34 @@ interface IconButtonProps
   "aria-label": string;
 }
 
-export const IconButton: React.FC<IconButtonProps> = ({
-  icon,
-  size = "medium",
-  variant = "ghost",
-  className = "",
-  "aria-label": ariaLabel,
-  ...props
-}) => {
-  return (
-    <StyledIconButton
-      variant={variant}
-      fullWidth={false}
-      size={size}
-      className={className}
-      aria-label={ariaLabel}
-      {...props}
-    >
-      <IconContent size={size}>{icon}</IconContent>
-    </StyledIconButton>
-  );
-};
+const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+  (
+    {
+      icon,
+      size = "medium",
+      variant = "ghost",
+      className = "",
+      "aria-label": ariaLabel,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <StyledIconButton
+        ref={ref}
+        variant={variant}
+        fullWidth={false}
+        size={size}
+        className={className}
+        aria-label={ariaLabel}
+        {...props}
+      >
+        <StyledIconContent size={size} variant={variant}>
+          {icon}
+        </StyledIconContent>
+      </StyledIconButton>
+    );
+  }
+);
+
+export default IconButton;

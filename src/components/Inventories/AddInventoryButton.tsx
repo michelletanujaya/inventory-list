@@ -1,10 +1,18 @@
 import { useState } from "react";
 import { Plus } from "../../ui/icons";
-import InventoryModal from "./InventoryModal";
 import Button from "../../ui/Button";
+import InventoryModal from "./InventoryModal";
+import { useProjectId } from "../../hooks/useProjectId";
+import { usePermissions } from "../../hooks/usePermissions";
 
 const AddInventoryButton = () => {
-  const [open, setOpen] = useState(false);
+  const projectId = useProjectId();
+  const { data: permissions } = usePermissions(projectId);
+  const [open, setOpen] = useState<boolean>(false);
+
+  if (!(permissions?.can_add || permissions?.is_admin)) {
+    return null;
+  }
 
   return (
     <>
@@ -14,6 +22,7 @@ const AddInventoryButton = () => {
       <InventoryModal
         isOpen={open}
         onClose={() => setOpen(false)}
+        projectId={projectId}
         title="Add Inventory"
       />
     </>

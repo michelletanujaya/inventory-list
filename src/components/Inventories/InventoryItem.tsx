@@ -1,7 +1,9 @@
 import styled from "styled-components";
-import EditTypeButton from "./EditTypeButton";
-import DeleteTypeButton from "./DeleteTypeButton";
+import EditInventoryButton from "./EditInventoryButton";
+import DeleteInventoryButton from "./DeleteInventoryButton";
 import { Inventory } from "../../lib/supabase";
+import { useProjectId } from "../../hooks/useProjectId";
+import { usePermissions } from "../../hooks/usePermissions";
 
 const StyledInventoryItem = styled.div`
   display: flex;
@@ -38,16 +40,27 @@ interface InventoryItemProps {
 }
 
 const InventoryItem = ({ item }: InventoryItemProps) => {
+  const projectId = useProjectId();
+  const { data: permissions } = usePermissions(projectId);
+
+  const getActions = () => {
+    if (permissions?.is_admin) {
+      return (
+        <StyledActions>
+          <DeleteInventoryButton itemId={item.id} />
+          <EditInventoryButton inventory={item} />
+        </StyledActions>
+      );
+    }
+  };
+
   return (
-    <StyledInventoryItem key={item.id}>
+    <StyledInventoryItem>
       <StyledDetails>
         <StyledName>{item.name}</StyledName>
         <StyledPrice>Rp {item.price.toFixed(2)}</StyledPrice>
       </StyledDetails>
-      <StyledActions>
-        <EditTypeButton inventory={item} />
-        <DeleteTypeButton itemId={item.id} />
-      </StyledActions>
+      {getActions()}
     </StyledInventoryItem>
   );
 };

@@ -1,0 +1,20 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Document outline (based on EmptyDocument) -->
+  <rect x="25" y="15" width="60" height="80" rx="4" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+  
+  <!-- Document corner fold -->
+  <path d="M75 15 L75 25 L85 25 Z" fill="#e2e8f0"/>
+  <path d="M75 15 L75 25 L85 25" stroke="#cbd5e1" stroke-width="1" fill="none"/>
+  
+  <!-- Document lines (similar to EmptyDocument but slightly more prominent) -->
+  <rect x="32" y="35" width="30" height="2" rx="1" fill="#e2e8f0"/>
+  <rect x="32" y="42" width="35" height="2" rx="1" fill="#e2e8f0"/>
+  <rect x="32" y="49" width="25" height="2" rx="1" fill="#e2e8f0"/>
+  <rect x="32" y="56" width="30" height="2" rx="1" fill="#e2e8f0"/>
+  
+  <!-- Prohibition circle overlay -->
+  <circle cx="60" cy="70" r="15" fill="#fef2f2" stroke="#dc2626" stroke-width="2.5"/>
+  
+  <!-- Prohibition slash -->
+  <path d="M48 58l24 24" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/>
+</svg> 

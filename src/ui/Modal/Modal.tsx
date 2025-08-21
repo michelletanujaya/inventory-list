@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   ModalBackdrop,
   ModalContent,
@@ -7,7 +8,7 @@ import {
   ModalBody,
   ModalActions,
 } from "./styles";
-import { IconButton } from "../IconButton/IconButton";
+import IconButton from "../IconButton";
 import { Close } from "../icons";
 
 interface ModalProps {
@@ -19,7 +20,7 @@ interface ModalProps {
   actions?: React.ReactNode;
 }
 
-export const Modal: React.FC<ModalProps> = ({
+const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   title,
@@ -53,7 +54,7 @@ export const Modal: React.FC<ModalProps> = ({
     }
   };
 
-  return (
+  const modalContent = (
     <ModalBackdrop
       onClick={handleBackdropClick}
       role="dialog"
@@ -70,4 +71,9 @@ export const Modal: React.FC<ModalProps> = ({
       </ModalContent>
     </ModalBackdrop>
   );
+
+  // Render modal in a portal to escape parent container constraints
+  return createPortal(modalContent, document.body);
 };
+
+export default Modal;

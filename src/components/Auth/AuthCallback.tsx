@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import { supabase } from "../../lib/supabase";
-import { useToast } from "../Toast";
+import { useToast } from "../../ui/Toast";
 
 const AuthCallback: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -14,19 +14,19 @@ const AuthCallback: React.FC = () => {
 
         if (error) {
           showToast("Authentication failed", "error");
-          navigate("/login");
+          router.push("/login");
         } else if (data.session) {
           showToast("Successfully logged in!", "success");
-          navigate("/");
+          router.push("/");
         }
       } catch (error) {
         showToast("Authentication failed", "error");
-        navigate("/login");
+        router.push("/login");
       }
     };
 
     handleAuthCallback();
-  }, [navigate, showToast]);
+  }, [router, showToast]);
 
   return <div>Completing authentication...</div>;
 };

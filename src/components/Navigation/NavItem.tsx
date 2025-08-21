@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import styled, { css } from "styled-components";
-import { NavItem as NavItemType } from "./constants";
+import { NavItemType } from "./utils";
 
 const NavItemStyles = css`
   color: var(--bg-primary-accent);
@@ -54,7 +54,7 @@ const NavItem = ({ closeSidebar, item }: NavItemProps) => {
 
   return (
     <StyledNavItem>
-      <StyledLink to={to} onClick={closeSidebar}>
+      <StyledLink href={to} onClick={closeSidebar}>
         {content}
       </StyledLink>
     </StyledNavItem>
