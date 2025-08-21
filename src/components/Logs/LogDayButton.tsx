@@ -1,25 +1,34 @@
 import { useState } from "react";
 import Button from "../../ui/Button";
 import LogDayModal from "./LogDayModal";
-import styled from "styled-components";
-
-const StyledLogDayButton = styled.div`
-  display: flex;
-  justify-content: flex-end;
-`;
+import { useProjectId } from "../../hooks/useProjectId";
+import { Plus } from "../../ui/icons";
+import { usePermissions } from "../../hooks/usePermissions";
 
 const LogDayButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const projectId = useProjectId();
+  const { data: permissions } = usePermissions(projectId);
+
+  if (!permissions?.can_add) {
+    return null;
+  }
 
   const handleLogDay = () => {
     setIsModalOpen(true);
   };
 
   return (
-    <StyledLogDayButton>
-      <Button onClick={handleLogDay}>Log day</Button>
-      <LogDayModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </StyledLogDayButton>
+    <>
+      <Button onClick={handleLogDay} variant="primary" icon={<Plus />}>
+        Log Day
+      </Button>
+      <LogDayModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        projectId={projectId}
+      />
+    </>
   );
 };
 

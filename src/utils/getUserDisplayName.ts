@@ -14,8 +14,6 @@ export const getUserDisplayName = (user: User | null): string => {
     user.identities?.[0]?.identity_data?.first_name,
   ];
 
-  console.log(user);
-
   // Return the first non-empty name found
   for (const name of possibleNames) {
     if (name && typeof name === "string" && name.trim().length > 0) {

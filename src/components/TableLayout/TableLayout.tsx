@@ -49,7 +49,7 @@ const IconRight = styled(ChevronRight)`
   margin-left: 0.5rem;
 `;
 
-interface TableLayoutProps<TData extends Record<string, unknown>> {
+interface TableLayoutProps {
   children?: React.ReactNode;
   emptyState?: React.ReactNode;
   errorState?: React.ReactNode;
@@ -67,7 +67,7 @@ interface TableLayoutProps<TData extends Record<string, unknown>> {
   search?: React.ReactNode;
 }
 
-export function TableLayout<TData extends Record<string, unknown>>({
+export function TableLayout({
   children,
   emptyState,
   errorState,
@@ -77,7 +77,7 @@ export function TableLayout<TData extends Record<string, unknown>>({
   isLoading,
   pagination,
   search,
-}: TableLayoutProps<TData>) {
+}: TableLayoutProps) {
   let content: React.ReactNode;
   if (isLoading) {
     content = <Spinner />;

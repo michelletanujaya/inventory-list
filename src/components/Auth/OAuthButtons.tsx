@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { useAuth } from "../../contexts/AuthContext";
 import Button from "../../ui/Button";
-import { useToast } from "../Toast";
+import { useToast } from "../../ui/Toast";
 
 const OAuthContainer = styled.div`
   display: flex;

@@ -1,17 +1,16 @@
 import { useState } from "react";
-import { IconButton } from "../../ui/IconButton";
-import { Delete } from "../../ui/icons";
-import { Modal } from "../../ui/Modal";
-import Button from "../../ui/Button";
 import { useDeleteLogByDate } from "../../hooks/useLogs";
-import { useToast } from "../Toast";
+import { useToast } from "../../ui/Toast";
 import { Alert } from "../../ui/Alert";
-import { ConfirmationModal } from "../../ui/ConfirmationModal";
+import ConfirmationModal from "../../ui/ConfirmationModal";
+import { useProjectId } from "../../hooks/useProjectId";
+import Button from "../../ui/Button";
 
 const DeleteLogButton = ({ logDate }: { logDate: string }) => {
+  const projectId = useProjectId();
   const [open, setOpen] = useState(false);
   const { showSuccess, showError } = useToast();
-  const deleteLog = useDeleteLogByDate({
+  const deleteLog = useDeleteLogByDate(projectId, {
     onSuccess: () => {
       showSuccess("Log deleted successfully!");
       setOpen(false);
@@ -28,13 +27,17 @@ const DeleteLogButton = ({ logDate }: { logDate: string }) => {
 
   return (
     <>
-      <IconButton
-        icon={<Delete />}
-        aria-label="Delete log"
+      <Button
         size="small"
-        onClick={() => setOpen(true)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        }}
         variant="secondary"
-      />
+      >
+        Delete
+      </Button>
       <ConfirmationModal
         isOpen={open}
         onClose={() => setOpen(false)}

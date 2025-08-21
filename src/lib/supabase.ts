@@ -1,7 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL!;
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl) {
+  throw new Error(
+    "NEXT_PUBLIC_SUPABASE_URL is required. Please add it to your environment variables."
+  );
+}
+
+if (!supabaseAnonKey) {
+  throw new Error(
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY is required. Please add it to your environment variables."
+  );
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -12,6 +24,7 @@ export interface Inventory {
   price: number;
   updated_at: string;
   created_at: string;
+  project_id: string;
 }
 
 export type InventoryInsert = Omit<
@@ -30,6 +43,7 @@ export interface Log {
   created_at: string;
   updated_at: string;
   inventory_id: string;
+  project_id: string;
 }
 
 export type LogInsert = Omit<Log, "id" | "created_at" | "updated_at">;
@@ -47,3 +61,12 @@ export interface AuthUser {
     sub: string;
   };
 }
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export type ProjectInsert = Omit<Project, "id">;
+export type ProjectUpdate = Partial<ProjectInsert>;

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   BottomModalBackdrop,
   BottomModalContent,
@@ -8,7 +9,7 @@ import {
   BottomModalTitle,
   BottomModalBody,
 } from "./styles";
-import { IconButton } from "../IconButton/IconButton";
+import IconButton from "../IconButton";
 import { Close } from "../icons";
 
 interface BottomModalProps {
@@ -58,7 +59,7 @@ export const BottomModal: React.FC<BottomModalProps> = ({
     onClose();
   };
 
-  return (
+  const modalContent = (
     <BottomModalBackdrop
       onClick={handleBackdropClick}
       role="dialog"
@@ -85,4 +86,7 @@ export const BottomModal: React.FC<BottomModalProps> = ({
       </BottomModalContent>
     </BottomModalBackdrop>
   );
+
+  // Render modal in a portal to escape parent container constraints
+  return createPortal(modalContent, document.body);
 };

@@ -6,22 +6,23 @@ import {
   updateInventory,
   deleteInventory,
 } from "../services/inventories";
-import type { InventoryInsert, InventoryUpdate } from "../lib/supabase";
+import type { InventoryUpdate } from "../lib/supabase";
 
 // Query keys
 export const inventoryKeys = {
   all: ["inventories"] as const,
   lists: () => [...inventoryKeys.all, "list"] as const,
-  list: (filters: string) => [...inventoryKeys.lists(), { filters }] as const,
+  list: (projectId: string) => [...inventoryKeys.lists(), projectId] as const,
   details: () => [...inventoryKeys.all, "detail"] as const,
   detail: (id: string) => [...inventoryKeys.details(), id] as const,
 };
 
 // Get all inventories
-export const useInventories = () => {
+export const useInventories = (projectId: string) => {
   return useQuery({
-    queryKey: inventoryKeys.lists(),
-    queryFn: getInventories,
+    queryKey: inventoryKeys.list(projectId),
+    queryFn: () => getInventories(projectId),
+    enabled: !!projectId,
   });
 };
 
@@ -35,16 +36,22 @@ export const useInventory = (id: string) => {
 };
 
 // Create inventory mutation
-export const useCreateInventory = (options?: {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-}) => {
+export const useCreateInventory = (
+  projectId: string,
+  options?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  }
+) => {
+  console.log("createInventory", projectId, options);
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: createInventory,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: inventoryKeys.list(projectId),
+      });
 
       options?.onSuccess?.();
     },
@@ -52,17 +59,22 @@ export const useCreateInventory = (options?: {
 };
 
 // Update inventory mutation
-export const useUpdateInventory = (options?: {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-}) => {
+export const useUpdateInventory = (
+  projectId: string,
+  options?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  }
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: InventoryUpdate }) =>
       updateInventory(id, updates),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: inventoryKeys.list(projectId),
+      });
       queryClient.invalidateQueries({
         queryKey: inventoryKeys.detail(data.id),
       });
@@ -73,13 +85,27 @@ export const useUpdateInventory = (options?: {
 };
 
 // Delete inventory mutation
-export const useDeleteInventoryById = (id: string) => {
+export const useDeleteInventoryById = (
+  id: string,
+  projectId: string,
+  options?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  }
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: () => deleteInventory(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: inventoryKeys.list(projectId),
+      });
+
+      options?.onSuccess?.();
+    },
+    onError: (error) => {
+      options?.onError?.(error as Error);
     },
   });
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal } from "../Modal";
+import Modal from "../Modal";
 import Button from "../Button";
 
 interface ConfirmationModalProps {
@@ -14,7 +14,7 @@ interface ConfirmationModalProps {
   children?: React.ReactNode;
 }
 
-export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
@@ -54,3 +54,5 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     </Modal>
   );
 };
+
+export default ConfirmationModal;

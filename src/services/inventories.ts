@@ -6,10 +6,13 @@ import {
 } from "../lib/supabase";
 
 // Get all inventories
-export const getInventories = async (): Promise<Inventory[]> => {
+export const getInventories = async (
+  projectId: string
+): Promise<Inventory[]> => {
   const { data, error } = await supabase
     .from("inventories")
     .select("*")
+    .eq("project_id", projectId)
     .order("name", { ascending: true });
 
   if (error) {
@@ -40,12 +43,9 @@ export const getInventoryById = async (
 export const createInventory = async (
   inventory: InventoryInsert
 ): Promise<Inventory> => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from("inventories")
-    .insert({ ...inventory, user_id: user?.id })
+    .insert(inventory)
     .select()
     .single();
 

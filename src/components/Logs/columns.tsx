@@ -1,8 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronRight } from "../../ui/icons";
-import { IconButton } from "../../ui/IconButton";
 import styled from "styled-components";
-import DeleteLogButton from "./DeleteLogButton";
+import IconButton from "../../ui/IconButton";
 
 const StyledActions = styled.div`
   display: flex;
@@ -65,7 +64,7 @@ export const columns: ColumnDef<LogRow>[] = [
   },
   {
     accessorKey: "endingQuantity",
-    header: "Running Total",
+    header: "End Total",
     enableSorting: false,
     minSize: 120,
     cell: ({ row }) => (
@@ -78,11 +77,9 @@ export const columns: ColumnDef<LogRow>[] = [
     enableSorting: false,
     cell: ({ row }) => {
       const isExpanded = row.getIsExpanded();
-      const { date } = row.original;
 
       return (
         <StyledActions>
-          {isExpanded && <DeleteLogButton logDate={date} />}
           <IconButton
             aria-label={isExpanded ? "Collapse row" : "Expand row"}
             icon={
@@ -91,7 +88,6 @@ export const columns: ColumnDef<LogRow>[] = [
               </AnimatedChevron>
             }
             onClick={() => row.toggleExpanded()}
-            size="small"
           />
         </StyledActions>
       );

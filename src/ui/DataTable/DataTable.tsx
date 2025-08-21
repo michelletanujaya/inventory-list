@@ -29,9 +29,13 @@ import { ArrowUpDown, ChevronUp, ChevronDown } from "../icons";
 import ResponsiveTableWrapper from "./ResponsiveTableWrapper";
 import { useHorizontalScroll } from "../../hooks/useHorizontalScroll";
 
-interface DataTableProps<TData> {
-  columns: ColumnDef<TData>[];
-  data: TData[];
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
+
+interface DataTableProps<D extends NonNullable<unknown>> {
+  columns: ColumnDef<D, any>[];
+  data: readonly D[];
   isLoading?: boolean;
   enableSorting?: boolean;
   enablePagination?: boolean;
@@ -40,10 +44,10 @@ interface DataTableProps<TData> {
   emptyMessage?: string;
   searchPlaceholder?: string;
   className?: string;
-  renderExpandedRow?: (row: TData) => React.ReactNode;
+  renderExpandedRow?: (row: D) => React.ReactNode;
 }
 
-export function DataTable<TData>({
+const DataTable = <D extends NonNullable<unknown>>({
   columns,
   data,
   isLoading = false,
@@ -55,7 +59,7 @@ export function DataTable<TData>({
   searchPlaceholder = "Search...",
   className = "",
   renderExpandedRow,
-}: DataTableProps<TData>) {
+}: DataTableProps<D>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [expanded, setExpanded] = useState<ExpandedState>({});
@@ -63,8 +67,8 @@ export function DataTable<TData>({
   const scrollRef = useHorizontalScroll();
 
   const table = useReactTable({
-    columns,
-    data,
+    columns: columns as Mutable<typeof columns>,
+    data: data as Mutable<typeof data>,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
     getPaginationRowModel: enablePagination
@@ -197,7 +201,7 @@ export function DataTable<TData>({
                 return (
                   <React.Fragment key={row.id}>
                     <TableRow isExpanded={isExpanded}>
-                      {row.getVisibleCells().map((cell) => (
+                      {row.getVisibleCells().map((cell: any) => (
                         <TableCell
                           key={cell.id}
                           className={
@@ -235,4 +239,6 @@ export function DataTable<TData>({
       </DataTableContainer>
     </ResponsiveTableWrapper>
   );
-}
+};
+
+export default DataTable;

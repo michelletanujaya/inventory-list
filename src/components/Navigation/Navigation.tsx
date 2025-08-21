@@ -1,19 +1,17 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Close, Hamburger } from "../../ui/icons";
-import { IconButton } from "../../ui/IconButton";
-import { NAV_ITEMS } from "./constants";
+import IconButton from "../../ui/IconButton/IconButton";
 import NavItem from "./NavItem";
-import { useLocation } from "react-router-dom";
+import { useRouter } from "next/router";
+import { useProjectId } from "../../hooks/useProjectId";
 import { useAuth } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import {
   getUserDisplayName,
   getUserInitials,
 } from "../../utils/getUserDisplayName";
 import ProfileModal from "../Profile/ProfileModal";
-
-const NavContainer = styled.div``;
+import { getNavItems } from "./utils";
 
 const StyledHeader = styled.header`
   display: flex;
@@ -164,10 +162,11 @@ const Navigation: React.FC = () => {
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
 
   const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
+  const projectId = useProjectId();
 
-  const location = useLocation();
-  const activeNav = NAV_ITEMS.find((item) => item.to === location.pathname);
+  const navItems = getNavItems(projectId);
+  const activeNav = navItems.find((item) => item.to === router.asPath);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -175,18 +174,17 @@ const Navigation: React.FC = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/login");
+    router.push("/login");
     setIsOpen(false);
   };
 
-  // Don't show navigation on login page
-  if (location.pathname === "/login") {
+  if (router.pathname === "/login") {
     return null;
   }
 
   return (
     <>
-      <NavContainer>
+      <div>
         <StyledHeader>
           <StyledTitle>
             <IconButton
@@ -214,7 +212,7 @@ const Navigation: React.FC = () => {
           </StyledNavHeaderContainer>
 
           <NavList>
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <NavItem key={item.to} item={item} closeSidebar={toggleSidebar} />
             ))}
           </NavList>
@@ -234,7 +232,7 @@ const Navigation: React.FC = () => {
             </>
           )}
         </Sidebar>
-      </NavContainer>
+      </div>
       <ProfileModal
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}

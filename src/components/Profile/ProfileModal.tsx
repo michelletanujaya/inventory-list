@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
-import { Modal } from "../../ui/Modal";
+import Modal from "../../ui/Modal";
 import { TextInput } from "../../ui/TextInput";
 import Button from "../../ui/Button";
-import { useToast } from "../Toast";
+import { useToast } from "../../ui/Toast";
 import { useForm } from "react-hook-form";
 
 const Form = styled.form`

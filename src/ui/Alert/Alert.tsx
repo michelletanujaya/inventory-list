@@ -9,27 +9,25 @@ import {
   AlertMessage,
 } from "./styles";
 
-export type AlertVariant = "error" | "success" | "info";
+export type AlertVariant = "error" | "success" | "info" | "warning";
 
 interface AlertProps {
   title: string;
   message?: string;
   variant?: AlertVariant;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon?: React.ReactNode;
 }
 
 const Alert = ({
   title,
   message,
   variant = "success",
-  icon: Icon = AlertCircle,
+  icon = <AlertCircle />,
 }: AlertProps) => {
   return (
     <AlertContainer data-testid="alert" variant={variant}>
       <AlertContent>
-        <StyledIcon variant={variant}>
-          <Icon aria-hidden="true" />
-        </StyledIcon>
+        <StyledIcon variant={variant}>{icon}</StyledIcon>
         <TextContainer>
           <AlertTitle>{title}</AlertTitle>
           {message && <AlertMessage>{message}</AlertMessage>}

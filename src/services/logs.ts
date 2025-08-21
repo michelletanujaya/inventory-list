@@ -6,8 +6,12 @@ import {
 } from "../lib/supabase";
 
 // Get all logs
-export const getLogs = async (): Promise<Log[]> => {
-  const { data, error } = await supabase.rpc("get_logs_with_running_totals");
+export const getLogs = async (projectId: string): Promise<Log[]> => {
+  const { data, error } = await supabase
+    .from("logs")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("date", { ascending: false });
 
   if (error) {
     console.error("RPC Error:", error);
@@ -34,12 +38,9 @@ export const getLogById = async (id: string): Promise<Log | null> => {
 
 // Create new log
 export const createLog = async (log: LogInsert): Promise<Log> => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from("logs")
-    .insert({ ...log, user_id: user?.id })
+    .insert(log)
     .select()
     .single();
 
@@ -112,6 +113,25 @@ export const getLogsByDateRange = async (
     .order("date", { ascending: false });
 
   if (error) {
+    throw new Error(error.message);
+  }
+
+  return data || [];
+};
+
+// Get logs with running totals (per inventory)
+export const getLogsWithRunningTotals = async (
+  projectId: string
+): Promise<Log[]> => {
+  const { data, error } = await supabase.rpc(
+    "get_daily_aggregated_logs_with_totals",
+    {
+      p_project_id: projectId,
+    }
+  );
+
+  if (error) {
+    console.error("RPC Error:", error);
     throw new Error(error.message);
   }
 

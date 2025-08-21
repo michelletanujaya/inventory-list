@@ -81,30 +81,6 @@ const ErrorContainer = styled.div`
   }
 `;
 
-const EmptyContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  text-align: center;
-  padding: 2rem;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  color: #6b7280;
-  max-width: 400px;
-
-  p {
-    margin: 0;
-    font-size: 1rem;
-  }
-
-  @media (max-width: 640px) {
-    padding: 1.5rem;
-    max-width: 300px;
-  }
-`;
-
 interface QueryBoundaryProps<T> {
   query: UseQueryResult<T, Error>;
   children: React.ReactNode | ((data: { data: T }) => React.ReactNode);

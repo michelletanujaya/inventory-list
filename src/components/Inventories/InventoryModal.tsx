@@ -1,5 +1,5 @@
 import Button from "../../ui/Button";
-import { Modal } from "../../ui/Modal";
+import Modal from "../../ui/Modal";
 import { TextInput } from "../../ui/TextInput";
 import {
   useCreateInventory,
@@ -9,7 +9,7 @@ import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { Inventory, InventoryInsert } from "../../lib/supabase";
 import Field from "../../ui/Field";
-import { useToast } from "../Toast";
+import { useToast } from "../../ui/Toast";
 import { useEffect } from "react";
 
 const StyledForm = styled.form`
@@ -23,6 +23,7 @@ interface InventoryModalProps {
   onClose: () => void;
   title: string;
   inventory?: Inventory;
+  projectId: string;
 }
 
 const InventoryModal = ({
@@ -30,6 +31,7 @@ const InventoryModal = ({
   onClose,
   title,
   inventory,
+  projectId,
 }: InventoryModalProps) => {
   const { showSuccess, showError } = useToast();
 
@@ -57,7 +59,7 @@ const InventoryModal = ({
     onClose();
   };
 
-  const createInventory = useCreateInventory({
+  const createInventory = useCreateInventory(projectId, {
     onSuccess: () => {
       showSuccess("Inventory created successfully!");
       onHandleClose();
@@ -67,7 +69,7 @@ const InventoryModal = ({
     },
   });
 
-  const updateInventory = useUpdateInventory({
+  const updateInventory = useUpdateInventory(projectId, {
     onSuccess: () => {
       showSuccess("Inventory updated successfully!");
       onHandleClose();
@@ -81,15 +83,18 @@ const InventoryModal = ({
     const formData = {
       name: data.name,
       price: data.price,
+      project_id: projectId,
     };
 
+    console.log("formData", formData);
+
     if (inventory) {
-      updateInventory.mutate({
+      await updateInventory.mutateAsync({
         id: inventory.id,
         updates: formData,
       });
     } else {
-      createInventory.mutate(formData);
+      await createInventory.mutateAsync(formData);
     }
   };
 
